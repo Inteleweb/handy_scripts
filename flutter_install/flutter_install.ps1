@@ -13,10 +13,15 @@ $minDiskSpaceGB = 2.5
 if ($cpuCores -ge $minCpuCores -and $memoryGB -ge $minMemoryGB -and $diskSpaceGB -ge $minDiskSpaceGB) {
     Write-Output "System meets the minimum requirements for Flutter."
 } else {
-    Write-Output "System does not meet the minimum requirements for Flutter."
+    Write-Output ""
+    Read-Host "System does not meet the minimum requirements for Flutter. Press Enter to continue with the download or any other key to exit" -OutVariable continue
+if ($continue -ne "") { exit }
 }
 
-$progressPreference = 'silentlyContinue'
+#$progressPreference = 'silentlyContinue'
+
+# Define package information
+#$progressPreference = 'silentlyContinue'
 
 # Define package information
 $wingetInstallerUrl = 'https://aka.ms/getwinget'
@@ -29,7 +34,7 @@ $uiXamlFile = 'Microsoft.UI.Xaml.2.7.x64.appx'
 
 function IsAppxPackageInstalled($packageName) {
     $package = Get-AppxPackage -Name $packageName -ErrorAction SilentlyContinue
-    return $package -ne $null
+    return $null -ne $package
 }
 
 function DownloadAndInstallAppx($url, $file, $packageName) {
@@ -48,6 +53,14 @@ if (-not (Get-Command 'Add-AppxPackage' -ErrorAction SilentlyContinue)) {
     return
 }
 
+function ForceCloseAppByPackageFullName($packageFullName) {
+    $processes = Get-Process | Where-Object { $_.MainModule.FileVersionInfo.ProductName -eq $packageFullName }
+    if ($processes) {
+        Write-Information "Closing apps associated with package $packageFullName"
+        $processes | Stop-Process -Force
+    }
+}
+
 try {
     # Check and install WinGet if necessary
     if (-not (Get-Command 'winget' -ErrorAction SilentlyContinue)) {
@@ -55,6 +68,9 @@ try {
     } else {
         Write-Information "WinGet is already installed."
     }
+
+    # Force close the Desktop App Installer if it's running
+    ForceCloseAppByPackageFullName 'Microsoft.DesktopAppInstaller'
 
     # Check and install Microsoft.VCLibs if necessary
     DownloadAndInstallAppx -url $vcLibsUrl -file $vcLibsFile -packageName 'Microsoft.VCLibs.140.00.UWPDesktop'
@@ -65,6 +81,7 @@ try {
 } catch {
     Write-Error "An error occurred: $_"
 }
+
 
 # Software checks and installation
 $windowsVersion = [Environment]::OSVersion.Version
@@ -83,5 +100,7 @@ if ($cpuCores -ge $minCpuCores -and $memoryGB -ge $minMemoryGB -and $diskSpaceGB
     $userChoice = Read-Host "All requirements met! Do you want to open Visual Studio Code? [Y/N]"
     if ($userChoice -eq 'Y') {
         Start-Process "code"
+        Start-Process "https://docs.flutter.dev/get-started/install/windows/web?tab=vscode#install-the-flutter-sdk"
+
     }
 }
