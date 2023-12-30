@@ -5,15 +5,21 @@ $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
 # Your download URLs for the script
-$DownloadURL = 'https://github.com/Inteleweb/handy_scripts/blob/main/flutter_install/flutter_install.ps1'
-$DownloadURL2 = 'https://inteleweb.com/files/flutter_get/flutter_install.ps1'
+$DownloadURL = 'https://raw.githubusercontent.com/Inteleweb/handy_scripts/e42efadb4a16ebe6c3e9890bd1c86fb037961b2e/flutter_install/flutter_install.ps1'
+$DownloadURL2 = 'https://inteleweb.com/files/flutter_install/flutter_install.ps1'
 
 # Random number for unique file naming
 $rand = Get-Random -Maximum 99999999
 
+
 # Check for admin rights and set the file path accordingly
 $isAdmin = ([Security.Principal.WindowsIdentity]::GetCurrent().Groups -match 'S-1-5-32-544')
 $FilePath = if ($isAdmin) { "$env:SystemRoot\Temp\YourScript_$rand.cmd" } else { "$env:TEMP\YourScript_$rand.cmd" }
+
+
+# Prompt for continuation for debugging before downloading
+Read-Host "Press Enter to continue with the download or any other key to exit" -OutVariable continue
+if ($continue -ne "") { exit }
 
 # Attempt to download the script from the primary URL, fallback to secondary if needed
 try {
@@ -28,6 +34,12 @@ $ScriptArgs = "$args "
 $prefix = "@REM $rand `r`n"
 $content = $prefix + $response.Content
 Set-Content -Path $FilePath -Value $content
+
+
+# Prompt for continuation after download and before execution
+Read-Host "Download complete. Press Enter to execute the script or any other key to exit" -OutVariable continue
+if ($continue -ne "") { exit }
+
 
 # Execute the script
 Start-Process $FilePath $ScriptArgs -Wait
