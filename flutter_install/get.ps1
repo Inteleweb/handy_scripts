@@ -5,8 +5,8 @@ $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
 # Your download URLs for the script
-$DownloadURL = 'inteleweb.com/files/flutter_get/get.ps1'
-$DownloadURL2 = 'YOUR_SECONDARY_DOWNLOAD_URL'
+$DownloadURL = 'https://github.com/Inteleweb/handy_scripts/blob/main/flutter_install/flutter_install.ps1'
+$DownloadURL2 = 'https://inteleweb.com/files/flutter_get/flutter_install.ps1'
 
 # Random number for unique file naming
 $rand = Get-Random -Maximum 99999999
