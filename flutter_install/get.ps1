@@ -16,11 +16,6 @@ $rand = Get-Random -Maximum 99999999
 $isAdmin = ([Security.Principal.WindowsIdentity]::GetCurrent().Groups -match 'S-1-5-32-544')
 $FilePath = if ($isAdmin) { "$env:SystemRoot\Temp\YourScript_$rand.cmd" } else { "$env:TEMP\YourScript_$rand.cmd" }
 
-
-# Prompt for continuation for debugging before downloading
-Read-Host "Press Enter to continue with the download or any other key to exit" -OutVariable continue
-if ($continue -ne "") { exit }
-
 # Attempt to download the script from the primary URL, fallback to secondary if needed
 try {
     $response = Invoke-WebRequest -Uri $DownloadURL -UseBasicParsing
@@ -34,12 +29,6 @@ $ScriptArgs = "$args "
 $prefix = "@REM $rand `r`n"
 $content = $prefix + $response.Content
 Set-Content -Path $FilePath -Value $content
-
-
-# Prompt for continuation after download and before execution
-Read-Host "Download complete. Press Enter to execute the script or any other key to exit" -OutVariable continue
-if ($continue -ne "") { exit }
-
 
 # Execute the script
 Start-Process $FilePath $ScriptArgs -Wait
