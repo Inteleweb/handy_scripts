@@ -16,6 +16,56 @@ if ($cpuCores -ge $minCpuCores -and $memoryGB -ge $minMemoryGB -and $diskSpaceGB
     Write-Output "System does not meet the minimum requirements for Flutter."
 }
 
+$progressPreference = 'silentlyContinue'
+
+# Define package information
+$wingetInstallerUrl = 'https://aka.ms/getwinget'
+$vcLibsUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
+$uiXamlUrl = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
+
+$wingetInstallerFile = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
+$vcLibsFile = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
+$uiXamlFile = 'Microsoft.UI.Xaml.2.7.x64.appx'
+
+function IsAppxPackageInstalled($packageName) {
+    $package = Get-AppxPackage -Name $packageName -ErrorAction SilentlyContinue
+    return $package -ne $null
+}
+
+function DownloadAndInstallAppx($url, $file, $packageName) {
+    if (-not (IsAppxPackageInstalled $packageName)) {
+        Write-Information "$packageName is not installed, downloading and installing..."
+        Invoke-WebRequest -Uri $url -OutFile $file -ErrorAction Stop
+        Add-AppxPackage -Path $file -ErrorAction Stop
+    } else {
+        Write-Information "$packageName is already installed."
+    }
+}
+
+# Ensure cmdlets are available
+if (-not (Get-Command 'Add-AppxPackage' -ErrorAction SilentlyContinue)) {
+    Write-Error "Add-AppxPackage is not available. Make sure you are running this script as an administrator in a PowerShell session."
+    return
+}
+
+try {
+    # Check and install WinGet if necessary
+    if (-not (Get-Command 'winget' -ErrorAction SilentlyContinue)) {
+        DownloadAndInstallAppx -url $wingetInstallerUrl -file $wingetInstallerFile -packageName 'WinGet'
+    } else {
+        Write-Information "WinGet is already installed."
+    }
+
+    # Check and install Microsoft.VCLibs if necessary
+    DownloadAndInstallAppx -url $vcLibsUrl -file $vcLibsFile -packageName 'Microsoft.VCLibs.140.00.UWPDesktop'
+
+    # Check and install Microsoft.UI.Xaml if necessary
+    DownloadAndInstallAppx -url $uiXamlUrl -file $uiXamlFile -packageName 'Microsoft.UI.Xaml.2.x'
+
+} catch {
+    Write-Error "An error occurred: $_"
+}
+
 # Software checks and installation
 $windowsVersion = [Environment]::OSVersion.Version
 $gitVersion = git --version
