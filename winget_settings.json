@@ -1,0 +1,27 @@
+//#a copy of my winget settings
+//#C:\Users\User\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
+
+{
+    "$schema": "https://aka.ms/winget-settings.schema.json",
+
+    // For documentation on these settings, see: https://aka.ms/winget-settings
+    "source": {
+        "autoUpdateIntervalInMinutes": 5
+    },
+    "visual": {
+        "progressBar": "rainbow"
+    },
+    "experimentalFeatures": {
+        "experimentalMSStore": true,
+        "windowsFeature": true,
+        "configuration03": true
+    },
+    "installBehavior": {
+        "disableInstallNotes": true
+    },
+    "telemetry": {
+        "enableTelemetry": false
+    }
+
+}
+
